@@ -2,18 +2,16 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
-
-import java.util.Iterator;
-import java.util.Random;
 
 public class GameScreen implements Screen {
     final MyGame game;
@@ -23,11 +21,14 @@ public class GameScreen implements Screen {
     private SpriteBatch batch;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
+    private Texture pogchampTexture;
+    private Texture lulTexture;
+    private Texture sadgeTexture;
+    private Texture brickTexture;
     private Array<Emote> emotes;
     private Array<Ball> balls;
     private Array<Brick> bricks;
-    private long lastBrickTime;
-    private Random r;
+    private Brain brain;
     public GameScreen(final MyGame game) {
         this.game = game;
 
@@ -41,38 +42,45 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
 
+        // Load textures
+        pogchampTexture = new Texture("pogchamp.png");
+        lulTexture = new Texture("lul.png");
+        sadgeTexture = new Texture("sadge.png");
+        brickTexture = new Texture("brick.png");
+
         // Create emotes
         emotes = new Array<Emote>();
 
-        Emote pogchamp = new Emote("pogchamp.png",400, 500, 100);
-        Emote lul = new Emote("lul.png",400, 400, 200);
-        Emote sadge = new Emote("sadge.png",400, 300, 300);
+        Emote pogchamp = new Emote(pogchampTexture,400, 500, 100, pogchampTexture.getWidth(), pogchampTexture.getHeight());
+        Emote lul = new Emote(lulTexture,400, 400, 200, lulTexture.getWidth(), lulTexture.getHeight());
+        Emote sadge = new Emote(sadgeTexture,400, 300, 300, sadgeTexture.getWidth(), sadgeTexture.getHeight());
         emotes.add(pogchamp);
         emotes.add(lul);
         emotes.add(sadge);
 
         // Create balls
-        r = new Random();
         balls = new Array<Ball>();
         for (int i = 0; i < 10; i ++) {
-            balls.add(new Ball(r.nextInt(screenWidth),
-                    r.nextInt(screenHeight),
-                    r.nextInt(100),
-                    r.nextInt(20)));
+            float radius = MathUtils.random(10, 100);
+            float x = MathUtils.random(0, screenWidth - radius);
+            float y = MathUtils.random(0, screenHeight - radius);
+            float speed = MathUtils.random(150, 300);
+            int colorChoice = MathUtils.random(1, 7);
+            balls.add(new Ball(x, y, speed, radius, colorChoice));
         }
 
-        // Create first brick
+        // Create bricks
         bricks = new Array<Brick>();
-        spawnBrick();
-    }
+        for (int i = 0; i < 5; i ++) {
+            float x = MathUtils.random(0, screenWidth - 64);
+            float y = MathUtils.random(0, screenHeight - 64);
+            float speed = MathUtils.random(150, 300);
+            bricks.add(new Brick(brickTexture, x, y, speed, brickTexture.getWidth(),brickTexture.getHeight()));
+        }
 
-    private void spawnBrick() {
-        int x = MathUtils.random(0, screenWidth - 64);
-        int y = screenHeight;
-        int speed = MathUtils.random(100, 200);
-        Brick brick = new Brick("brick.png", x, y, speed);
-        bricks.add(brick);
-        lastBrickTime = TimeUtils.nanoTime();
+        // Set up brain input processor
+        brain = new Brain(emotes, balls, bricks);
+        Gdx.input.setInputProcessor(brain);
     }
 
     @Override
@@ -100,54 +108,23 @@ public class GameScreen implements Screen {
         }
         batch.end();
 
-        // Update emote positions
-        for (Emote emote: emotes) {
-            // Updating position
-            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                emote.setX(emote.getX() - (emote.getSpeed() * delta));
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                emote.setX(emote.getX() + (emote.getSpeed() * delta));
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                emote.setY(emote.getY() + (emote.getSpeed() * delta));
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                emote.setY(emote.getY() - (emote.getSpeed() * delta));
-            }
-
-            // Boundary checking
-            emote.setX(MathUtils.clamp(emote.getX(), 0, screenWidth - emote.getWidth()));
-            emote.setY(MathUtils.clamp(emote.getY(), 0, screenHeight - emote.getHeight()));
-        }
-
-        // Update ball positions
+        // Draw balls
         shape.begin(ShapeRenderer.ShapeType.Filled);
         for (Ball ball : balls) {
-            ball.setX(ball.getX() + ball.getXSpeed());
-            ball.setY(ball.getY() + ball.getYSpeed());
-
-            if (ball.getX() < 0 || ball.getY() > screenWidth) {
-                ball.setxSpeed(-ball.getXSpeed());
-            }
-            if (ball.getY() < 0 || ball.getY() > screenHeight) {
-                ball.setySpeed(-ball.getYSpeed());
-            }
-
+            shape.setColor(ball.getColor());
             shape.circle(ball.getX(), ball.getY(), ball.getRadius());
         }
         shape.end();
 
-        // Spawn bricks
-        if (TimeUtils.nanoTime() - lastBrickTime > 1000000000) spawnBrick();
-
-        for (Iterator<Brick> iter = bricks.iterator(); iter.hasNext();) {
-            Brick brick = iter.next();
-            brick.setY(brick.getY() - (brick.getSpeed() * delta));
-            if (brick.getY() + brick.getHeight() < 0) {
-                brick.getTexture().dispose();
-                iter.remove();
-            }
+        // Update motion for all entities
+        for (Emote emote: emotes) {
+            emote.updateMotion();
+        }
+        for (Ball ball: balls) {
+            ball.updateMotion();
+        }
+        for (Brick brick: bricks) {
+            brick.updateMotion();
         }
 
     }
@@ -175,11 +152,9 @@ public class GameScreen implements Screen {
     @Override
     public void dispose () {
         batch.dispose();
-        for (Emote emote : emotes) {
-            emote.getTexture().dispose();
-        }
-        for (Brick brick : bricks) {
-            brick.getTexture().dispose();
-        }
+        pogchampTexture.dispose();
+        lulTexture.dispose();
+        sadgeTexture.dispose();
+        brickTexture.dispose();
     }
 }

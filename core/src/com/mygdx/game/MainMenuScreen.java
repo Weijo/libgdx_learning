@@ -28,8 +28,11 @@ public class MainMenuScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
-        game.font.draw(game.batch, "Welcome to some game? ", screenWidth / 2 - 175, screenHeight / 2 + 100);
-        game.font.draw(game.batch, "Press any key to continue", screenWidth / 2 - 175, screenHeight / 2 - 100);
+        game.font.draw(game.batch, "Welcome to some game? ", screenWidth / 2 - 175, screenHeight / 2 + 125);
+        game.font.draw(game.batch, "WASD to control balls ", screenWidth / 2 - 175, screenHeight / 2 + 50);
+        game.font.draw(game.batch, "Arrow keys to control emotes ", screenWidth / 2 - 175, screenHeight / 2);
+        game.font.draw(game.batch, "IJKL  to control bricks ", screenWidth / 2 - 175, screenHeight / 2 - 50);
+        game.font.draw(game.batch, "Press any key to continue", screenWidth / 2 - 175, screenHeight / 2 - 125);
         game.batch.end();
 
         if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY)) {

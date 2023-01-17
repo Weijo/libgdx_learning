@@ -1,49 +1,66 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 
-public class Ball {
-    private int x;
-    private int y;
-    private int radius;
-    private int xSpeed;
-    private int ySpeed;
-    public Ball(int x, int y, int radius, int speed) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.xSpeed = speed;
-        this.ySpeed = speed;
+public class Ball extends Entity{
+    Color color;
+    public Ball(float x, float y, float speed, float radius, int colorChoice) {
+        super(x, y, speed, radius);
+        switch (colorChoice) {
+            case 1:
+                this.color = Color.RED;
+                break;
+            case 2:
+                this.color = Color.BLUE;
+                break;
+            case 3:
+                this.color = Color.GREEN;
+                break;
+            case 4:
+                this.color = Color.YELLOW;
+                break;
+            case 5:
+                this.color = Color.PURPLE;
+                break;
+            case 6:
+                this.color = Color.VIOLET;
+                break;
+            case 7:
+                this.color = Color.ORANGE;
+                break;
+            default:
+                this.color = Color.WHITE;
+                break;
+        }
+    }
+    public Color getColor() {
+        return color;
     }
 
-    public int getX() {
-        return x;
-    }
+    @Override
+    public void updateMotion() {
+        float delta = Gdx.graphics.getDeltaTime();
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
 
-    public int getY() {
-        return y;
-    }
-    public int getRadius() {
-        return radius;
-    }
-    public int getXSpeed() {
-        return xSpeed;
-    }
-    public int getYSpeed() {
-        return ySpeed;
-    }
-    public void setX(int x) {
-        this.x = x;
-    }
-    public void setY(int y) {
-        this.y = y;
-    }
-    public void setxSpeed(int xSpeed) {
-        this.xSpeed = xSpeed;
-    }
-    public void setySpeed(int ySpeed) {
-        this.ySpeed = ySpeed;
+        if (this.isLeftMove()) {
+            this.setX(this.getX() - this.getSpeed() * delta);
+        }
+        if (this.isRightMove()) {
+            this.setX(this.getX() + this.getSpeed() * delta);
+        }
+        if (this.isUpMove()) {
+            this.setY(this.getY() + this.getSpeed() * delta);
+        }
+        if (this.isDownMove()) {
+            this.setY(this.getY() - this.getSpeed() * delta);
+        }
+
+        // ball boundary check
+        this.setX(MathUtils.clamp(this.getX(), this.getRadius(), screenWidth - this.getRadius()));
+        this.setY(MathUtils.clamp(this.getY(), this.getRadius(), screenHeight - this.getRadius()));
+
     }
 }
