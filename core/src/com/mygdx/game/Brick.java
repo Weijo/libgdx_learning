@@ -2,15 +2,18 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
-public class Emote {
-    private Texture texture;
+public class Brick {
     private float x;
     private float y;
+    private float speed;
+    private Texture texture;
     private float width;
     private float height;
-    private int speed;
-    public Emote(String img, float x, float y, int speed) {
+
+    public Brick(String img, float x, float y, int speed) {
         this.texture = new Texture(img);
         this.speed = speed;
         this.x = x;
@@ -26,7 +29,6 @@ public class Emote {
     public float getX() {
         return x;
     }
-
     public float getY() {
         return y;
     }
@@ -38,16 +40,12 @@ public class Emote {
     public float getHeight() {
         return height;
     }
-
     public float getSpeed() {
-        return this.speed;
-    }
-
-    public void setX(float x) {
-        this.x = x;
+        return speed;
     }
 
     public void setY(float y) {
         this.y = y;
     }
+
 }
