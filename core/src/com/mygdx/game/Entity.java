@@ -1,109 +1,117 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 
-public class Entity {
-    private float x;
-    private float y;
-    private float speed;
-    private float width;
-    private float height;
-    private float radius;
-    private boolean leftMove;
-    private boolean rightMove;
-    private boolean upMove;
-    private boolean downMove;
-
-    public Entity(float x, float y, float speed, float radius) {
+public abstract class Entity {
+    private Texture texture;
+    private Color color;
+    private float x, y, speed;
+    private float width, height;
+    private float dy, dx;
+    private float mass;
+    public Entity(float x, float y, float speed, Color color) {
         this.x = x;
         this.y = y;
         this.speed = speed;
-        this.radius = radius;
+        this.color = color;
+        this.dy = 0;
+        this.dx = 0;
     }
-    public Entity(float x, float y, float speed, float width, float height) {
+    public Entity(float x, float y, float speed, Texture texture, float width, float height, float mass) {
         this.x = x;
         this.y = y;
         this.speed = speed;
+        this.texture = texture;
         this.width = width;
         this.height = height;
+        this.mass = mass;
+        this.dy = 0;
+        this.dx = 0;
     }
-
     public float getX() {
         return x;
+    }
+    public void setX(float x) {
+        this.x = x;
     }
     public float getY() {
         return y;
     }
-    public float getSpeed() {
-        return speed;
-    }
-    public float getWidth() {
-        return width;
-    }
-    public float getHeight() {
-        return height;
-    }
-    public float getRadius() {
-        return radius;
-    }
-
-    public boolean isLeftMove() {
-        return leftMove;
-    }
-    public boolean isRightMove() {
-        return rightMove;
-    }
-    public boolean isUpMove() {
-        return upMove;
-    }
-    public boolean isDownMove() {
-        return downMove;
-    }
-
-    public void setX(float x) {
-        this.x = x;
-    }
     public void setY(float y) {
         this.y = y;
+    }
+    public float getSpeed() {
+        return speed;
     }
     public void setSpeed(float speed) {
         this.speed = speed;
     }
-    public void setLeftMove(boolean leftMove) {
-        this.leftMove = leftMove;
+    public float getWidth() {
+        return width;
     }
-    public void setRightMove(boolean rightMove) {
-        this.rightMove = rightMove;
+    public void setWidth(float width) {
+        this.width = width;
     }
-    public void setUpMove(boolean upMove) {
-        this.upMove = upMove;
+    public float getHeight() {
+        return height;
     }
-    public void setDownMove(boolean downMove) {
-        this.downMove = downMove;
+    public void setHeight(float height) {
+        this.height = height;
+    }
+    public Texture getTexture() {
+        return texture;
+    }
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+    }
+    public Color getColor() {
+        return color;
+    }
+    public void setColor(Color color) {
+        this.color = color;
+    }
+    public float[] getCenter() {
+        float[] result = new float[2];
+        result[0] = (this.getX() + this.getWidth()) / 2f;
+        result[1] = (this.getY() + this.getHeight()) / 2f;
+        return result;
     }
 
-    public void updateMotion() {
+    public float getDx() {
+        return dx;
+    }
+
+    public void setDx(float dx) {
+        this.dx = dx;
+    }
+
+    public float getDy() {
+        return dy;
+    }
+
+    public void setDy(float dy) {
+        this.dy = dy;
+    }
+
+    public float getMass() {
+        return mass;
+    }
+
+    public void setMass(float mass) {
+        this.mass = mass;
+    }
+
+    public void updatePosition() {
         float delta = Gdx.graphics.getDeltaTime();
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
-        if (leftMove) {
-            x -= speed * delta;
-        }
-        if (rightMove) {
-            x += speed * delta;
-        }
-        if (upMove) {
-            y += speed * delta;
-        }
-        if (downMove) {
-            y -= speed * delta;
-        }
-
-        // Boundary check
-        x = MathUtils.clamp(x, 0, screenWidth - width);
-        y = MathUtils.clamp(y, 0, screenHeight - height);
-
+        this.setX(this.getX() + this.getDx() * delta);
+        this.setY(this.getY() + this.getDy() * delta);
     }
+    public abstract void movement();
 }
